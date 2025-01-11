@@ -16,47 +16,61 @@ const getWorkouts = async (req, res) => {
 
 // get a single workout
 const getWorkout = async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(404).json({error: 'No such workout'})
+    return res.status(404).json({ error: "No such workout" });
   }
 
-  const workout = await Workout.findById(id)
-
+  const workout = await Workout.findById(id);
   if (!workout) {
-    return res.status(404).json({error: 'No such workout'})
+    return res.status(404).json({ error: "No such workout" });
   }
-  
-  res.status(200).json(workout)
-}
+
+  res.set("Content-Type", workout.certificate.contentType);
+  res.send(workout.certificate.data);
+};
+
 
 
 // create new workout
 const createWorkout = async (req, res) => {
-  const {title, points} = req.body
+  const { title, points } = req.body;
+  const certificate = req.file; // Assume Multer processes the uploaded file
 
-  let emptyFields = []
+  let emptyFields = [];
+  if (!title) emptyFields.push("title");
+  if (!points) emptyFields.push("points");
+  if (!certificate) emptyFields.push("certificate");
 
-  if(!title) {
-    emptyFields.push('title')
-  }
-  if(!points) {
-    emptyFields.push('points')
-  }
-  if(emptyFields.length > 0) {
-    return res.status(400).json({ error: 'Please fill in all the fields', emptyFields })
+  if (emptyFields.length > 0) {
+    return res.status(400).json({ error: "Please fill in all the fields", emptyFields });
   }
 
-  // add doc to db
+  // Validate certificate format
+  const allowedExtensions = /\.(pdf|jpg|jpeg|png)$/i;
+  if (!allowedExtensions.test(certificate.originalname)) {
+    return res.status(400).json({ error: "Invalid file format for certificate" });
+  }
+
+  // Add document to DB
   try {
-    const user_id = mongoose.Types.ObjectId(req.user._id);
-    const workout = await Workout.create({ title, points, user_id });
-    res.status(200).json(workout)
+    const user_id = mongoose.Types.ObjectId(req.user._id); // Assume user is authenticated
+    const workout = await Workout.create({
+      title,
+      points,
+      user_id,
+      certificate: {
+        data: certificate.buffer, // Store binary data
+        contentType: certificate.mimetype, // Store MIME type
+      },
+    });
+    res.status(200).json(workout);
   } catch (error) {
-    res.status(400).json({error: error.message})
+    res.status(400).json({ error: error.message });
   }
-}
+};
+
 
 // delete a workout
 const deleteWorkout = async (req, res) => {
@@ -77,22 +91,35 @@ const deleteWorkout = async (req, res) => {
 
 // update a workout
 const updateWorkout = async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
+  const certificate = req.file;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(404).json({error: 'No such workout'})
+    return res.status(404).json({ error: "No such workout" });
   }
 
-  const workout = await Workout.findOneAndUpdate({_id: id}, {
-    ...req.body
-  })
+  const updates = { ...req.body };
+
+  if (certificate) {
+    const allowedExtensions = /\.(pdf|jpg|jpeg|png)$/i;
+    if (!allowedExtensions.test(certificate.originalname)) {
+      return res.status(400).json({ error: "Invalid file format for certificate" });
+    }
+    updates.certificate = {
+      data: certificate.buffer,
+      contentType: certificate.mimetype,
+    };
+  }
+
+  const workout = await Workout.findOneAndUpdate({ _id: id }, updates, { new: true });
 
   if (!workout) {
-    return res.status(400).json({error: 'No such workout'})
+    return res.status(400).json({ error: "No such workout" });
   }
 
-  res.status(200).json(workout)
-}
+  res.status(200).json(workout);
+};
+
 
 // Get all workouts grouped by user (admin-only)
 // get all workouts for admin

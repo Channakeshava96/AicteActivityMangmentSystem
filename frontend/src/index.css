@@ -185,4 +185,16 @@ form.signup, form.login,form.adminlogin {
   color: var(--primary);
 }
 
-/* dashboard */
+input[type="file"] {
+  margin: 10px 0;
+}
+
+.certificate-link {
+  color: #007bff;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.certificate-link:hover {
+  color: #0056b3;
+}

@@ -13,5 +13,5 @@ router.post('/signup', signupUser)
 router.post('/admin', Adminlogin)
 
 //dashboard route
-// router.post('/dashboard', dashboard)
+//router.post('/dashboard', dashboard)
 module.exports = router
