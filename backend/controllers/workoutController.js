@@ -147,13 +147,14 @@ const getAllWorkoutsForAdmin = async (req, res) => {
               title: "$title",
               points: "$points",
               createdAt: "$createdAt",
+              certificate: "$certificate",
             },
           },
         },
       },
       {
         $lookup: {
-          from: "users", // Make sure your users collection is named "users"
+          from: "users", // Ensure the collection name is correct
           localField: "_id",
           foreignField: "_id",
           as: "userDetails",
@@ -165,16 +166,24 @@ const getAllWorkoutsForAdmin = async (req, res) => {
           userId: "$_id",
           totalPoints: 1,
           workouts: 1,
-          userDetails: { name: 1, email: 1 }, // Adjust fields as necessary
+          userDetails: { $arrayElemAt: ["$userDetails", 0] }, // Extract first matching user
         },
       },
     ]);
 
-    res.status(200).json(workouts);
+    // Map through results to handle empty userDetails
+    const updatedWorkouts = workouts.map((entry) => ({
+      ...entry,
+      userDetails: entry.userDetails || { name: "Unknown", email: "N/A" }, // Default values for missing users
+    }));
+
+    res.status(200).json(updatedWorkouts);
   } catch (error) {
+    console.error("Error fetching admin workouts:", error);
     res.status(500).json({ error: error.message });
   }
 };
+
 
 module.exports = {
   getWorkouts,
@@ -182,5 +191,5 @@ module.exports = {
   createWorkout,
   deleteWorkout,
   updateWorkout,
-  getAllWorkoutsForAdmin, // Add this export
+  getAllWorkoutsForAdmin, // Export function for use in routes
 };
