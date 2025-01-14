@@ -16,11 +16,23 @@ const workoutSchema = new Schema({
     ref: 'User',
   },
   certificate: {
-    data: Buffer,  // Keep the binary data for processing when needed (optional)
-    contentType: String, // MIME type (e.g., 'application/pdf', 'image/png')
-    filename: String,  // Store the file name
-    path: String,  // Path to the file in the uploads folder
-    size: Number, // File size in bytes
+    // Only store the file path in the database
+    path: {
+      type: String,  // Path to the file in the uploads folder
+      required: true,
+    },
+    filename: {
+      type: String,  // Store the file name
+      required: true,
+    },
+    size: {
+      type: Number,  // Store the file size
+      required: true,
+    },
+    contentType: {
+      type: String,  // MIME type (e.g., 'application/pdf', 'image/png')
+      required: true,
+    },
   },
 }, { timestamps: true });
 

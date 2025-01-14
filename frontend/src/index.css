@@ -189,12 +189,39 @@ input[type="file"] {
   margin: 10px 0;
 }
 
-.certificate-link {
-  color: #007bff;
-  text-decoration: underline;
+
+
+.toggle-preview-btn {
+  background-color: #28a745; /* Green button (same as workout form button) */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
   cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-top: 15px;
 }
 
-.certificate-link:hover {
-  color: #0056b3;
+.toggle-preview-btn:hover {
+  background-color: #218838; /* Darker green on hover */
+}
+
+.toggle-preview-btn:focus {
+  outline: none; /* Remove outline when focused */
+}
+
+.workout-details img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+.workout-details embed {
+  width: 100%;
+  height: 500px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
 }

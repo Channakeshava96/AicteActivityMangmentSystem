@@ -60,21 +60,26 @@ const createWorkout = async (req, res) => {
 
   try {
     const user_id = mongoose.Types.ObjectId(req.user._id); // Assume user is authenticated
+
+    // Store the certificate details in the workout
     const workout = await Workout.create({
       title,
       points,
       user_id,
-      certificate: `/uploads/${certificate.filename}`, // Save relative file path
+      certificate: {
+        path: `/uploads/${certificate.filename}`, // Path to the file in the 'uploads' folder
+        filename: certificate.filename,           // Filename
+        size: certificate.size,                   // File size in bytes
+        contentType: certificate.mimetype,        // MIME type (e.g., 'application/pdf', 'image/png')
+      },
     });
-
-    console.log("Workout Created:", workout); // Debugging statement
 
     res.status(200).json(workout);
   } catch (error) {
-    console.error("Error creating workout:", error); // Debugging statement
     res.status(400).json({ error: error.message });
   }
 };
+
 
 // delete a workout
 const deleteWorkout = async (req, res) => {

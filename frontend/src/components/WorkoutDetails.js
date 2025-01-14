@@ -1,12 +1,14 @@
+import { useState } from "react";
 import { useWorkoutsContext } from "../hooks/useWorkoutsContext";
 import { useAuthContext } from "../hooks/useAuthContext";
 
-// date fns
+// date-fns
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
 
 const WorkoutDetails = ({ workout }) => {
   const { dispatch } = useWorkoutsContext();
   const { user } = useAuthContext();
+  const [showPreview, setShowPreview] = useState(false); // Toggle state for certificate preview
 
   const handleClick = async () => {
     if (!user) {
@@ -27,25 +29,8 @@ const WorkoutDetails = ({ workout }) => {
   };
 
   const renderCertificatePreview = () => {
-    // Log the certificate object for debugging
-    console.log("Certificate Debug:", workout.certificate);
-
-    if (workout.certificate && workout.certificate.data) {
-      let fileSrc;
-
-      // Check if `workout.certificate.data` is already a Base64 string or needs conversion
-      if (Array.isArray(workout.certificate.data)) {
-        // Convert binary data to Base64
-        const binaryData = new Uint8Array(workout.certificate.data);
-        const base64String = btoa(
-          binaryData.reduce((data, byte) => data + String.fromCharCode(byte), "")
-        );
-        fileSrc = `data:${workout.certificate.contentType};base64,${base64String}`;
-      } else {
-        fileSrc = workout.certificate.data; // Assume it's already Base64 if not an array
-      }
-
-      // Check content type and render appropriately
+    if (workout.certificate && workout.certificate.path) {
+      const fileSrc = workout.certificate.path; // Use the path from the backend
       const contentType = workout.certificate.contentType;
 
       if (contentType && contentType.startsWith("image")) {
@@ -83,6 +68,10 @@ const WorkoutDetails = ({ workout }) => {
     return <p>No certificate available.</p>;
   };
 
+  const togglePreview = () => {
+    setShowPreview(!showPreview); // Toggle the preview visibility
+  };
+
   return (
     <div className="workout-details">
       <h4>{workout.title}</h4>
@@ -91,7 +80,15 @@ const WorkoutDetails = ({ workout }) => {
         {workout.points}
       </p>
       <p>{formatDistanceToNow(new Date(workout.createdAt), { addSuffix: true })}</p>
-      {renderCertificatePreview()}
+
+      {/* Button to toggle preview visibility */}
+      <button className="toggle-preview-btn" onClick={togglePreview}>
+        {showPreview ? "Hide Certificate" : "Show Certificate Preview"}
+      </button>
+
+      {/* Conditionally render certificate preview */}
+      {showPreview && renderCertificatePreview()}
+
       <span className="material-symbols-outlined" onClick={handleClick}>
         delete
       </span>
