@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-
 const Schema = mongoose.Schema;
 
 const workoutSchema = new Schema({
@@ -14,14 +13,14 @@ const workoutSchema = new Schema({
   user_id: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: 'User', // Reference to the User model
+    ref: 'User',
   },
   certificate: {
-    type: {
-      data: Buffer, // Binary data for the file
-      contentType: String, // MIME type (e.g., 'application/pdf', 'image/png')
-    },
-    required: true, // This ensures the entire certificate object is mandatory
+    data: Buffer,  // Keep the binary data for processing when needed (optional)
+    contentType: String, // MIME type (e.g., 'application/pdf', 'image/png')
+    filename: String,  // Store the file name
+    path: String,  // Path to the file in the uploads folder
+    size: Number, // File size in bytes
   },
 }, { timestamps: true });
 

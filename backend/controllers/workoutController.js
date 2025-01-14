@@ -1,5 +1,6 @@
-const Workout = require('../models/workoutModel')
-const mongoose = require('mongoose')
+const Workout = require('../models/workoutModel');
+const mongoose = require('mongoose');
+const path = require('path');
 
 // get all workouts
 const getWorkouts = async (req, res) => {
@@ -7,12 +8,12 @@ const getWorkouts = async (req, res) => {
     const workouts = await Workout.find()
       .populate('user_id', 'email') // Populate user_id with the email field from User model
       .sort({ createdAt: -1 });
-
+    console.log("Workout Response:", workouts);
     res.status(200).json(workouts);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-}
+};
 
 // get a single workout
 const getWorkout = async (req, res) => {
@@ -22,21 +23,25 @@ const getWorkout = async (req, res) => {
     return res.status(404).json({ error: "No such workout" });
   }
 
-  const workout = await Workout.findById(id);
-  if (!workout) {
-    return res.status(404).json({ error: "No such workout" });
-  }
+  try {
+    const workout = await Workout.findById(id);
 
-  res.set("Content-Type", workout.certificate.contentType);
-  res.send(workout.certificate.data);
+    if (!workout) {
+      return res.status(404).json({ error: "No such workout" });
+    }
+
+    console.log("Retrieved Workout:", workout); // Debugging statement
+
+    res.status(200).json(workout);
+  } catch (error) {
+    console.error("Error retrieving workout:", error); // Debugging statement
+    res.status(500).json({ error: error.message });
+  }
 };
 
-
-
-// create new workout
 const createWorkout = async (req, res) => {
   const { title, points } = req.body;
-  const certificate = req.file; // Assume Multer processes the uploaded file
+  const certificate = req.file;
 
   let emptyFields = [];
   if (!title) emptyFields.push("title");
@@ -53,41 +58,40 @@ const createWorkout = async (req, res) => {
     return res.status(400).json({ error: "Invalid file format for certificate" });
   }
 
-  // Add document to DB
   try {
     const user_id = mongoose.Types.ObjectId(req.user._id); // Assume user is authenticated
     const workout = await Workout.create({
       title,
       points,
       user_id,
-      certificate: {
-        data: certificate.buffer, // Store binary data
-        contentType: certificate.mimetype, // Store MIME type
-      },
+      certificate: `/uploads/${certificate.filename}`, // Save relative file path
     });
+
+    console.log("Workout Created:", workout); // Debugging statement
+
     res.status(200).json(workout);
   } catch (error) {
+    console.error("Error creating workout:", error); // Debugging statement
     res.status(400).json({ error: error.message });
   }
 };
 
-
 // delete a workout
 const deleteWorkout = async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(404).json({error: 'No such workout'})
+    return res.status(404).json({ error: 'No such workout' });
   }
 
-  const workout = await Workout.findOneAndDelete({_id: id})
+  const workout = await Workout.findOneAndDelete({ _id: id });
 
   if (!workout) {
-    return res.status(400).json({error: 'No such workout'})
+    return res.status(400).json({ error: 'No such workout' });
   }
 
-  res.status(200).json(workout)
-}
+  res.status(200).json(workout);
+};
 
 // update a workout
 const updateWorkout = async (req, res) => {
@@ -105,24 +109,27 @@ const updateWorkout = async (req, res) => {
     if (!allowedExtensions.test(certificate.originalname)) {
       return res.status(400).json({ error: "Invalid file format for certificate" });
     }
-    updates.certificate = {
-      data: certificate.buffer,
-      contentType: certificate.mimetype,
-    };
+
+    updates.certificate = `/uploads/${certificate.filename}`; // Update with relative path
   }
 
-  const workout = await Workout.findOneAndUpdate({ _id: id }, updates, { new: true });
+  try {
+    const workout = await Workout.findOneAndUpdate({ _id: id }, updates, { new: true });
 
-  if (!workout) {
-    return res.status(400).json({ error: "No such workout" });
+    if (!workout) {
+      return res.status(400).json({ error: "No such workout" });
+    }
+
+    console.log("Workout Updated:", workout); // Debugging statement
+
+    res.status(200).json(workout);
+  } catch (error) {
+    console.error("Error updating workout:", error); // Debugging statement
+    res.status(400).json({ error: error.message });
   }
-
-  res.status(200).json(workout);
 };
 
-
 // Get all workouts grouped by user (admin-only)
-// get all workouts for admin
 const getAllWorkoutsForAdmin = async (req, res) => {
   try {
     const workouts = await Workout.aggregate([

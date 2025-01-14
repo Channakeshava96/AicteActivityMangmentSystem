@@ -1,4 +1,5 @@
 const express = require('express');
+const multer = require('multer');
 const {
   createWorkout,
   getWorkouts,
@@ -8,10 +9,18 @@ const {
   getAllWorkoutsForAdmin,
 } = require('../controllers/workoutController');
 const requireAuth = require('../middleware/requireAuth');
-const multer = require('multer');
 
-// Configure Multer for file uploads
-const storage = multer.memoryStorage(); // Store files in memory as buffers
+// Configure Multer for file uploads (using disk storage)
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // Specify the 'uploads' folder as the destination
+  },
+  filename: (req, file, cb) => {
+    // Generate a unique filename based on the current timestamp and original filename
+    cb(null, Date.now() + '-' + file.originalname);
+  },
+});
+
 const upload = multer({ storage: storage });
 
 const router = express.Router();

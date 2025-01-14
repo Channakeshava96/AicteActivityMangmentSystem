@@ -1,8 +1,8 @@
-import { useWorkoutsContext } from '../hooks/useWorkoutsContext';
-import { useAuthContext } from '../hooks/useAuthContext';
+import { useWorkoutsContext } from "../hooks/useWorkoutsContext";
+import { useAuthContext } from "../hooks/useAuthContext";
 
 // date fns
-import formatDistanceToNow from 'date-fns/formatDistanceToNow';
+import formatDistanceToNow from "date-fns/formatDistanceToNow";
 
 const WorkoutDetails = ({ workout }) => {
   const { dispatch } = useWorkoutsContext();
@@ -13,8 +13,8 @@ const WorkoutDetails = ({ workout }) => {
       return;
     }
 
-    const response = await fetch('/api/workouts/' + workout._id, {
-      method: 'DELETE',
+    const response = await fetch("/api/workouts/" + workout._id, {
+      method: "DELETE",
       headers: {
         Authorization: `Bearer ${user.token}`,
       },
@@ -22,8 +22,65 @@ const WorkoutDetails = ({ workout }) => {
     const json = await response.json();
 
     if (response.ok) {
-      dispatch({ type: 'DELETE_WORKOUT', payload: json });
+      dispatch({ type: "DELETE_WORKOUT", payload: json });
     }
+  };
+
+  const renderCertificatePreview = () => {
+    // Log the certificate object for debugging
+    console.log("Certificate Debug:", workout.certificate);
+
+    if (workout.certificate && workout.certificate.data) {
+      let fileSrc;
+
+      // Check if `workout.certificate.data` is already a Base64 string or needs conversion
+      if (Array.isArray(workout.certificate.data)) {
+        // Convert binary data to Base64
+        const binaryData = new Uint8Array(workout.certificate.data);
+        const base64String = btoa(
+          binaryData.reduce((data, byte) => data + String.fromCharCode(byte), "")
+        );
+        fileSrc = `data:${workout.certificate.contentType};base64,${base64String}`;
+      } else {
+        fileSrc = workout.certificate.data; // Assume it's already Base64 if not an array
+      }
+
+      // Check content type and render appropriately
+      const contentType = workout.certificate.contentType;
+
+      if (contentType && contentType.startsWith("image")) {
+        return (
+          <img
+            src={fileSrc}
+            alt="Certificate Preview"
+            style={{
+              maxWidth: "100%",
+              height: "auto",
+              border: "1px solid #ddd",
+              borderRadius: "5px",
+              padding: "5px",
+            }}
+          />
+        );
+      } else if (contentType && contentType === "application/pdf") {
+        return (
+          <embed
+            src={fileSrc}
+            type="application/pdf"
+            style={{
+              width: "100%",
+              height: "500px",
+              border: "1px solid #ddd",
+              borderRadius: "5px",
+            }}
+          />
+        );
+      } else {
+        return <p style={{ color: "red" }}>Unsupported certificate format.</p>;
+      }
+    }
+
+    return <p>No certificate available.</p>;
   };
 
   return (
@@ -33,22 +90,8 @@ const WorkoutDetails = ({ workout }) => {
         <strong>Activity Points: </strong>
         {workout.points}
       </p>
-      <p>
-        {formatDistanceToNow(new Date(workout.createdAt), { addSuffix: true })}
-      </p>
-      {/* Display Certificate Link */}
-      {workout.certificate && (
-        <p>
-          <a
-            href={`/api/workouts/${workout._id}/certificate`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="certificate-link"
-          >
-            View Certificate
-          </a>
-        </p>
-      )}
+      <p>{formatDistanceToNow(new Date(workout.createdAt), { addSuffix: true })}</p>
+      {renderCertificatePreview()}
       <span className="material-symbols-outlined" onClick={handleClick}>
         delete
       </span>

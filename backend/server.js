@@ -2,6 +2,7 @@ require('dotenv').config()
 
 const express = require('express')
 const mongoose = require('mongoose')
+const path = require('path'); // Required to work with file paths
 const workoutRoutes = require('./routes/workouts')
 const userRoutes = require('./routes/user')
 
@@ -15,6 +16,8 @@ app.use((req, res, next) => {
   console.log(req.path, req.method)
   next()
 })
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // routes
 app.use('/api/workouts', workoutRoutes)
