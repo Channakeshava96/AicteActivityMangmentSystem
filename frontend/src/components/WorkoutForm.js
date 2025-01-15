@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useWorkoutsContext } from '../hooks/useWorkoutsContext';
 import { useAuthContext } from '../hooks/useAuthContext';
 
@@ -11,6 +11,8 @@ const WorkoutForm = () => {
   const [certificate, setCertificate] = useState(null); // File state
   const [error, setError] = useState(null);
   const [emptyFields, setEmptyFields] = useState([]);
+
+  const fileInputRef = useRef(); // Ref for the file input
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,6 +48,7 @@ const WorkoutForm = () => {
       setTitle('');
       setPoints('');
       setCertificate(null);
+      fileInputRef.current.value = ''; // Reset the file input
       setError(null);
       setEmptyFields([]);
       dispatch({ type: 'CREATE_WORKOUT', payload: json });
@@ -72,11 +75,12 @@ const WorkoutForm = () => {
         className={emptyFields.includes('points') ? 'error' : ''}
       />
 
-      <label>Upload Certificate (Optional):</label>
+      <label>Upload Certificate:</label>
       <input
         type="file"
         accept=".pdf,.jpg,.jpeg,.png"
         onChange={(e) => setCertificate(e.target.files[0])}
+        ref={fileInputRef} // Attach the ref
       />
 
       <button>Add Workout</button>

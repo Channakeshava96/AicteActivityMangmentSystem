@@ -230,52 +230,73 @@ input[type="file"] {
 .admin-panel {
   margin: 20px auto;
   max-width: 800px;
+  padding: 20px;
+  background-color: #f9f9f9; /* Light background to distinguish panel */
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }
 
 .user-workouts {
-  background: #fff;
-  border-radius: 4px;
+  background: #ffffff;
+  border-radius: 8px;
   margin: 20px 0;
   padding: 20px;
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Softer shadow */
+  transition: transform 0.2s, box-shadow 0.2s; /* Add interactivity */
+}
+
+.user-workouts:hover {
+  transform: translateY(-5px); /* Slight lift effect */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
 }
 
 .user-workouts h3 {
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   color: var(--primary);
 }
 
 .user-workouts ul {
   list-style-type: none;
   padding: 0;
+  margin: 0;
+}
+
+.user-workouts li {
+  margin-bottom: 15px;
+  font-size: 1em;
+  color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.user-workouts li strong {
+  color: #333;
 }
 
 .toggle-preview-btn {
-  background-color: #28a745; /* Green color for buttons */
-  color: white;
+  background-color: var(--primary);
+  color: #fff;
   border: none;
+  border-radius: 4px;
   padding: 5px 10px;
-  border-radius: 3px;
+  font-size: 0.9em;
   cursor: pointer;
-  margin-left: 10px;
-  font-size: 14px;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s ease-in-out;
 }
 
-.toggle-preview-btn:hover {
-  background-color: #218838;
-}
-
-.certificate-preview img {
-  display: block;
-  max-width: 100%;
-  margin: 10px 0;
-}
-
+.certificate-preview img,
 .certificate-preview embed {
-  width: 100%;
-  height: 300px;
-  margin-top: 10px;
+  max-width: 100%;
   border: 1px solid #ddd;
-  border-radius: 5px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.certificate-preview {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f3f3f3;
+  border-radius: 8px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }

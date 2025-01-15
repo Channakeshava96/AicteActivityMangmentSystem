@@ -5,15 +5,18 @@ const path = require('path');
 // get all workouts
 const getWorkouts = async (req, res) => {
   try {
-    const workouts = await Workout.find()
+    const userId = req.user._id; // Ensure user ID is extracted from the authenticated user
+    const workouts = await Workout.find({ user_id: userId }) // Filter workouts by the logged-in user's ID
       .populate('user_id', 'email') // Populate user_id with the email field from User model
       .sort({ createdAt: -1 });
     console.log("Workout Response:", workouts);
     res.status(200).json(workouts);
   } catch (error) {
+    console.error("Error retrieving workouts:", error); // Debugging statement
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // get a single workout
 const getWorkout = async (req, res) => {
@@ -144,6 +147,7 @@ const getAllWorkoutsForAdmin = async (req, res) => {
           totalPoints: { $sum: "$points" },
           workouts: {
             $push: {
+              _id: "$_id",
               title: "$title",
               points: "$points",
               createdAt: "$createdAt",
@@ -154,10 +158,15 @@ const getAllWorkoutsForAdmin = async (req, res) => {
       },
       {
         $lookup: {
-          from: "users", // Ensure the collection name is correct
+          from: "users",
           localField: "_id",
           foreignField: "_id",
           as: "userDetails",
+        },
+      },
+      {
+        $addFields: {
+          userDetails: { $arrayElemAt: ["$userDetails", 0] }, // Extract single object from array
         },
       },
       {
@@ -166,20 +175,14 @@ const getAllWorkoutsForAdmin = async (req, res) => {
           userId: "$_id",
           totalPoints: 1,
           workouts: 1,
-          userDetails: { $arrayElemAt: ["$userDetails", 0] }, // Extract first matching user
+          "userDetails.name": 1,
+          "userDetails.email": 1,
         },
       },
     ]);
 
-    // Map through results to handle empty userDetails
-    const updatedWorkouts = workouts.map((entry) => ({
-      ...entry,
-      userDetails: entry.userDetails || { name: "Unknown", email: "N/A" }, // Default values for missing users
-    }));
-
-    res.status(200).json(updatedWorkouts);
+    res.status(200).json(workouts);
   } catch (error) {
-    console.error("Error fetching admin workouts:", error);
     res.status(500).json({ error: error.message });
   }
 };
