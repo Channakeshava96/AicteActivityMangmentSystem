@@ -34,8 +34,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "frontend": "npm start --prefix frontend",
-  "backend": "npm run dev --prefix backend",
-  "start": "concurrently \"npm run frontend\" \"npm run backend\""
+    "backend": "npm run dev --prefix backend",
+    "start": "concurrently \"npm run frontend\" \"npm run backend\""
   },
   "keywords": [],
   "author": "",
