@@ -1,7 +1,4 @@
 {
-  "devDependencies": {
-    "concurrently": "^9.1.2"
-  },
   "name": "aicte-project",
   "version": "1.0.0",
   "main": "index.js",
@@ -12,6 +9,7 @@
     "cliui": "^8.0.1",
     "color-convert": "^2.0.1",
     "color-name": "^1.1.4",
+    "concurrently": "^9.1.2",
     "emoji-regex": "^8.0.0",
     "escalade": "^3.2.0",
     "get-caller-file": "^2.0.5",
@@ -33,14 +31,12 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-   "start:backend": "npm run dev --prefix backend",
-  "start:frontend": "npm start --prefix frontend",
-  "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\""
+    "start:backend": "npm run dev --prefix backend",
+    "start:frontend": "npm start --prefix frontend",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": ""
 }
-
-
