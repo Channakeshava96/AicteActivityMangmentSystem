@@ -1,5 +1,6 @@
 require('dotenv').config()
 
+
 const express = require('express')
 const mongoose = require('mongoose')
 const path = require('path'); // Required to work with file paths
